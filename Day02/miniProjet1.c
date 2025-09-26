@@ -1,21 +1,22 @@
 #include<stdio.h>
 #include<string.h>
-#define nbrLivreMax 1000
+#include<ctype.h>
+#define nbrLivreMax 3
 #define longueurChaineMax 100
 
 
 
 int main(){
-	int choix;
+	int choix, validation;
 	char reponse, titres[nbrLivreMax][longueurChaineMax], auteurs[nbrLivreMax][longueurChaineMax];
 	float prix[nbrLivreMax];
 	size_t quantite[nbrLivreMax], nbrLivres=0, i;
 	char titreLivre[longueurChaineMax];
     size_t nouvelleQuantite, positionLivre, j;
-    int cmp;
+    int cmparaison;
 	char titreTemp[longueurChaineMax], auteurTemp[longueurChaineMax];
 	float prixTemp;
-	size_t quantiteTemp, k, nbrTotallivres = 0, dernierChoix;
+	size_t quantiteTemp, k, nbrTotallivres = 0, dernierChoix = 7;
 
     do {
         printf("\n=== MENU PRINCIPAL ===\n");
@@ -34,14 +35,18 @@ int main(){
                 printf("Ajouter un livre au Stock....\n");
 				do{
 					if(nbrLivres && dernierChoix == 1){
-						printf("Voulez-vous ajouter un autre livre? [Y/N]\n");
-						scanf("%c",&reponse);
-						getchar();
+						do{
+							printf("Voulez-vous ajouter un autre livre? [Y/N]\n");
+							scanf("%c", &reponse);//pas d'idee comment surmonter une reponse de plus d'un caractere.
+							getchar();
+						}while (reponse != 'Y' && reponse != 'y' && reponse != 'N' && reponse != 'n');
 					}
-
-					if (!nbrLivres)
-					{
+					else{
 						reponse = 'y';
+					}
+					if(nbrLivres==nbrLivreMax && (reponse=='y'||reponse=='Y')){
+						printf("\"\"\"Pas de place disponible pour ajouter un nouveau livre.\"\"\"");
+						break;
 					}
 					
 					if(reponse == 'Y' || reponse == 'y'){
@@ -49,12 +54,17 @@ int main(){
 						fgets(titres[nbrLivres], longueurChaineMax, stdin);
 						printf("Entrez l'auteur du livre: ");
 						fgets(auteurs[nbrLivres], longueurChaineMax, stdin);
-						printf("Entrez le prix du livre: ");
-						scanf("%f", &prix[nbrLivres]);
-						printf("Entrez la quantit� du livre: ");
-						scanf("%zu", &quantite[nbrLivres]);
+						do{
+							printf("Entrez le prix du livre: ");
+							validation = scanf("%f", &prix[nbrLivres]);
+							while(getchar()!='\n');
+						}while(validation<=0);
+						do{
+							printf("Entrez la quantité du livre: ");
+							validation = scanf("%zu", &quantite[nbrLivres]);
+							while(getchar()!='\n');
+						}while(validation<=0);
 						nbrLivres++;
-						getchar();
 						
 						dernierChoix = 1;
 					}
@@ -65,9 +75,7 @@ int main(){
                 printf("Liste des livres disponibles...\n");
 				dernierChoix = 2;
 				for(i=0;i<nbrLivres;i++){
-					if(quantite[i]){
-						printf("[Livre %d]  Le titre du livre est: %s, son auteur est: %s sa quantité est: %zu et son prix est: %.2f\n", i+1, titres[i], auteurs[i], quantite[i], prix[i]);
-					}
+					printf("**[Livre %d]** Le titre du livre est: %s, son auteur est: %s sa quantité est: %zu et son prix est: %.2f\n", i+1, titres[i], auteurs[i], quantite[i], prix[i]);
 				}
                 break;
             case 3:
@@ -75,26 +83,31 @@ int main(){
 				dernierChoix = 3;
 				printf("Entrez le titre du livre: ");
 				fgets(titreLivre, longueurChaineMax, stdin);
-				printf("Entrez la quantite du livre: ");
-				scanf("%zu", &nouvelleQuantite);
-				getchar();
+				do{
+					printf("Entrez la quantite du livre: ");
+					validation = scanf("%zu", &nouvelleQuantite);
+					while(getchar()!='\n');
+				}while(validation<=0);
 				
 				for(i=0;i<nbrLivres;i++){
-					j=0;
-					while(titreLivre[j]!='\0'){
-						cmp = titreLivre[j]-titres[i][j];
-						cmp = (cmp<0)?(-1*cmp):cmp;
-						if(!(cmp==32 || cmp==0)){
+					if(strlen(titreLivre)==strlen(titres[i])){
+						j=0;
+						while(titreLivre[j]!='\0'){
+							cmparaison = toupper(titreLivre[j])-toupper(titres[i][j]);
+							if(cmparaison){
+								break;
+							}
+							j++;
+						}
+						if(titreLivre[j]=='\0'){
+							quantite[i] = nouvelleQuantite;
+							printf("**[Livre %d]** Le titre du livre est: %s, son auteur est: %s sa nouvelle quantité est: %zu et son prix est: %.2f\n", i+1, titres[i], auteurs[i], quantite[i], prix[i]);
 							break;
 						}
-						j++;
-					}
-					
-					if(titreLivre[j]=='\0'){
-						quantite[i] = nouvelleQuantite;
-						break;
 					}
 				}
+				if(i==nbrLivres)
+					printf("**** Ce livre n'existe pas. ****");
 	
                 break;
             case 4:
@@ -104,57 +117,42 @@ int main(){
 				fgets(titreLivre, longueurChaineMax, stdin);
 				
 				for(i=0;i<nbrLivres;i++){
-					j=0;
-					while(titreLivre[j]!='\0') {
-						cmp = titreLivre[j]-titres[i][j];
-						cmp = (cmp<0)?(-1*cmp):cmp;
-						if(!(cmp==32 || cmp==0)){
+					if(strlen(titreLivre)==strlen(titres[i])){
+						j=0;
+						while(titreLivre[j]!='\0'){
+							cmparaison = toupper(titreLivre[j])-toupper(titres[i][j]);
+							if(cmparaison){
+								break;
+							}
+							j++;
+						}
+						if(titreLivre[j]=='\0'){
+							strcpy(titreTemp, titres[i]);
+							strcpy(auteurTemp, auteurs[i]);
+							prixTemp = prix[i];
+							quantiteTemp = quantite[i];
+							printf("** Le livre %s dont l'auteur est: %s, la quantité est: %zu et le prix est: %.2f a été supprimé avec succés.\n", titreTemp, auteurTemp, quantiteTemp, prixTemp);
+						
+							for (k = i; k < nbrLivres-1; k++){
+								strcpy(titres[k], titres[k+1]);
+								strcpy(auteurs[k], auteurs[k+1]);
+								prix[k] = prix[k+1];
+								quantite[k] = quantite[k+1];
+							}
+							nbrLivres--;
 							break;
 						}
-						j++;
-					}
-					
-					if(titreLivre[j]=='\0'){
-						j=0;
-						while(titreLivre[j]!='\0') {
-							titreTemp[j]=titres[i][j];
-							j++;
-						}
-						titreTemp[j]='\0';
-						j=0;
-						while(auteurs[i][j]!='\0') {
-							auteurTemp[j]=auteurs[i][j];
-							j++;
-						}
-						auteurTemp[j]='\0';
-						prixTemp = prix[i];
-						quantiteTemp = quantite[i];
-						for (k = i; k < nbrLivres-1; k++)
-						{
-							j=0;
-							while(titres[k+1][j]!='\0') {
-								titres[k][j]=titres[k+1][j];
-								j++;
-							}
-							titres[k][j]='\0';
-							j=0;
-							while(auteurs[k+1][j]!='\0') {
-								auteurs[k][j]=auteurs[k+1][j];
-								j++;
-							}
-							auteurs[k][j]='\0';
-							prix[k] = prix[k+1];
-							quantite[k] = quantite[k+1];
-						}
-						nbrLivres--;
-						break;
 					}
 				}
-	
+
+				if(i==nbrLivres && titreLivre[j]!='\0')
+					printf("**** Ce livre n'existe pas. ****");
+				
                 break;
             case 5:
                 printf("Nombre Total de livres en Stock...\n");
 				dernierChoix = 5;
+				nbrTotallivres = 0;
 				for(i=0;i<nbrLivres;i++){
 					nbrTotallivres += quantite[i];
 				}
