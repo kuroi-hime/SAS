@@ -26,22 +26,27 @@ int menu(){
 }
 
 size_t numeroValide(char numTele[]){
-	size_t j=0;
+	int l=0;
 	
-	while(numTele[j]!='\0'){
-		if(!j){
-  		    if((numTele[j]!='+')&&!isdigit(numTele[j])){
-  		    	printf("%d", !isdigit(numTele[j]));
+	while(numTele[l]!='\0'){
+		if(!l){
+  		    if((numTele[l]!='+')&&!(isdigit(numTele[l]))){
+			    printf("0");	
   		    	break;
 			  }
-		}else{
-			if(!isdigit(numTele[j])){
-				break;
-			}
 		}
-		j++;
+//		if((l!=0)&&(numTele[l]<'0' || numTele[l]>'9')){ //Probleme ici
+//				printf("!%d!", l);
+//				break;
+//		}
+		l++;
+		printf("**%d**\n", l);
 	}
-	return (numTele[j]=='\0')? 1:0;
+ 
+	if (numTele[l]=='\0')
+	   return 1;
+    return 0;
+//    return (numTele[l]=='\0')? 1:0;
 }
 
 size_t adresseEmailValide(char adresseEmail[]){
@@ -74,7 +79,7 @@ int ajouterContact(size_t nbrContacts, int dernierChoix, contact contacts[]){
             do{
             	printf("Entrez le numéro de téléphone du contact: ");
             	fgets(contacts[nbrContacts].numTelephone, longueurChaineMax, stdin);
-            	printf("%s.\n", contacts[nbrContacts].numTelephone);
+            	printf("%s.\n", numeroValide(contacts[nbrContacts].numTelephone));
 			}while(!numeroValide(contacts[nbrContacts].numTelephone));
             printf("Entrez l'adresse email du contact: ");
             fgets(contacts[nbrContacts].adresseEmail, longueurChaineMax, stdin);
@@ -223,7 +228,11 @@ void main(){
 
         switch(choix){
             case 1:
-                nbrContacts = ajouterContact(nbrContacts, dernierChoix, contacts);
+//                nbrContacts = ajouterContact(nbrContacts, dernierChoix, contacts);
+                printf("Entrez le numéro de téléphone du contact: ");
+            	fgets(contacts[0].numTelephone, longueurChaineMax, stdin);
+            	
+            	printf("%s\nLE / %d", contacts[0].numTelephone,numeroValide(contacts[0].numTelephone));
                 dernierChoix = 1;
             break;
             case 2: 
