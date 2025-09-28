@@ -6,7 +6,7 @@
 
 typedef struct contact{
 	char nom[longueurChaineMax];
-	char numTelephone[13];
+	char numTelephone[13+1];
 	char adresseEmail[longueurChaineMax];
 }contact;
 
@@ -26,69 +26,99 @@ int menu(){
 }
 
 size_t numeroValide(char numTele[]){
-	int l=0;
+	size_t l=0;
 	
 	while(numTele[l]!='\0'){
 		if(!l){
   		    if((numTele[l]!='+')&&!(isdigit(numTele[l]))){
-			    printf("0");	
   		    	break;
 			  }
 		}
-//		if((l!=0)&&(numTele[l]<'0' || numTele[l]>'9')){ //Probleme ici
-//				printf("!%d!", l);
-//				break;
-//		}
+        else{
+            if(!(isdigit(numTele[l]))){
+                break;
+            }
+        }
 		l++;
-		printf("**%d**\n", l);
 	}
- 
-	if (numTele[l]=='\0')
-	   return 1;
-    return 0;
-//    return (numTele[l]=='\0')? 1:0;
+
+   return (numTele[l]=='\n'|| numTele[l]=='\0')? 1:0;
 }
 
 size_t adresseEmailValide(char adresseEmail[]){
-	
+	size_t positionArobas, positionPoint, m=strlen(adresseEmail), i=0, nbrArobas=0;
+
+    if(adresseEmail[0]=='@' || !strchr(adresseEmail, '@') || !strchr(adresseEmail, '.'))
+        return 0;
+    while(adresseEmail[i]!='\0'){
+        if(adresseEmail[i]=='@'){
+            nbrArobas++;
+            positionArobas=i;
+        }
+        if(adresseEmail[i]=='.'){
+            positionPoint = i;
+        }
+        i++;
+    }
+
+    if(nbrArobas>1)
+        return 0;
+    if(adresseEmail[i-1]=='\n'){
+        if(positionPoint==i-2)
+            return 0;
+    }
+    else{
+        if(positionPoint==i-1)
+            return 0;
+    }
+
+    return (positionArobas<positionPoint+1)?1:0;
 }
 
 int ajouterContact(size_t nbrContacts, int dernierChoix, contact contacts[]){
     char reponse;
+    // size_t reponseValide=1;
     
     printf("Ajouter un contact....\n");
     do{
         if(nbrContacts && dernierChoix == 1){
             do{
-                printf("Voulez-vous ajouter un autre contact? [Y/N]\n");
+                printf("Voulez-vous ajouter un autre contact? [O/N]\n");
                 scanf("%c", &reponse);//pas d'idee comment surmonter une reponse de plus d'un caractere.
-                getchar();
-            }while (reponse != 'Y' && reponse != 'y' && reponse != 'N' && reponse != 'n');
+                while(getchar()!='\n');
+            }while (reponse != 'O' && reponse != 'o' && reponse != 'N' && reponse != 'n');
         }
         else{
-            reponse = 'y';
+            reponse = 'o';
         }
-        if(nbrContacts==nbrContactsMax && (reponse=='y'||reponse=='Y')){
+        if(nbrContacts==nbrContactsMax && (reponse=='o'||reponse=='O')){
             printf("\"\"\"Pas de place disponible pour ajouter un nouveau contact.\"\"\"");
             break;
         }
         
-        if(reponse == 'Y' || reponse == 'y'){
+        if(reponse == 'O' || reponse == 'o'){
             printf("Entrez le nom du contact: ");
             fgets(contacts[nbrContacts].nom, longueurChaineMax, stdin);
+            if(!strchr(contacts[nbrContacts].nom, '\n'))
+                    while(getchar()!='\n');
             do{
-            	printf("Entrez le numéro de téléphone du contact: ");
-            	fgets(contacts[nbrContacts].numTelephone, longueurChaineMax, stdin);
-            	printf("%s.\n", numeroValide(contacts[nbrContacts].numTelephone));
+            	printf("Entrez le numï¿½ro de tï¿½lï¿½phone du contact: ");
+            	fgets(contacts[nbrContacts].numTelephone, sizeof(contacts[nbrContacts].numTelephone), stdin);
+                if(!strchr(contacts[nbrContacts].numTelephone, '\n'))
+                    while(getchar()!='\n');
 			}while(!numeroValide(contacts[nbrContacts].numTelephone));
-            printf("Entrez l'adresse email du contact: ");
-            fgets(contacts[nbrContacts].adresseEmail, longueurChaineMax, stdin);
+            do{
+                printf("Entrez l'adresse email du contact: ");
+                fgets(contacts[nbrContacts].adresseEmail, longueurChaineMax, stdin);
+                if(!strchr(contacts[nbrContacts].adresseEmail, '\n'))
+                        while(getchar()!='\n');
+            }while(!adresseEmailValide(contacts[nbrContacts].adresseEmail));
             
             nbrContacts++;
             dernierChoix = 1;
         }
         
-    }while(reponse == 'Y' || reponse == 'y');
+    }while(reponse == 'o' || reponse == 'O');
 
     return nbrContacts;
 }
@@ -159,7 +189,7 @@ int modifierContact(size_t nbrContacts, contact contacts[]){
     printf("Entrez le nom du contact: ");
     fgets(nomContact, longueurChaineMax, stdin);
     do{
-        printf("Entrez le nouveau numéro de contact: ");
+        printf("Entrez le nouveau numï¿½ro de contact: ");
         scanf("%s", nouveauNum);
 //        while(getchar()!='\n');
     }while((nouveauNum[0]!='0')&&(nouveauNum[0]!='+'));
@@ -199,7 +229,7 @@ size_t supprimerContact(size_t nContacts, contact contacts[]){
                 strcpy(temp.numTelephone, contacts[i].numTelephone);
                 strcpy(temp.adresseEmail, contacts[i].adresseEmail);
             
-                printf("** Le contact %s dont le numéro est: %s, l'adresse email est: %s a été supprimé avec succés.\n", temp.nom, temp.numTelephone, temp.adresseEmail);
+                printf("** Le contact %s dont le numï¿½ro est: %s, l'adresse email est: %s a ï¿½tï¿½ supprimï¿½ avec succï¿½s.\n", temp.nom, temp.numTelephone, temp.adresseEmail);
             
                 for (k = i; k < nContacts-1; k++){
                     strcpy(contacts[k].nom, contacts[k+1].nom);
@@ -228,11 +258,7 @@ void main(){
 
         switch(choix){
             case 1:
-//                nbrContacts = ajouterContact(nbrContacts, dernierChoix, contacts);
-                printf("Entrez le numéro de téléphone du contact: ");
-            	fgets(contacts[0].numTelephone, longueurChaineMax, stdin);
-            	
-            	printf("%s\nLE / %d", contacts[0].numTelephone,numeroValide(contacts[0].numTelephone));
+                nbrContacts = ajouterContact(nbrContacts, dernierChoix, contacts);
                 dernierChoix = 1;
             break;
             case 2: 
@@ -253,7 +279,7 @@ void main(){
                 break;
             default:
                 dernierChoix = 6;
-                printf("Choix invalide. Veuillez réssayer.\n");
+                printf("Choix invalide. Veuillez rï¿½ssayer.\n");
         }
     }while(choix!=6);
 }
